@@ -1,4 +1,4 @@
-package com.ryabos.codeeditor;
+package com.ryabos.codeeditor.suggestions;
 
 import java.util.Scanner;
 
@@ -25,7 +25,9 @@ public class SuggestionSupplier {
             String commandStart = commandScanner.next();
             String regexStart = regexScanner.next();
             String patternStart = patternScanner.next();
-            if (commandStart.matches(regexStart)) {
+            boolean commandDetected = commandStart.matches(regexStart);
+
+            if (commandDetected) {
                 while (regexScanner.hasNext() && commandScanner.hasNext() && patternScanner.hasNext()) {
                     StringBuilder commandFragment = new StringBuilder(commandScanner.next());
                     while (commandScanner.hasNext() && commandFragment.toString().endsWith(",")) {
@@ -34,19 +36,24 @@ public class SuggestionSupplier {
                     String regexFragment = regexScanner.next();
                     String patternFragment = patternScanner.next();
 
-                    if (commandFragment.toString().matches(regexFragment)) {
-                        if (!commandScanner.hasNext() && patternScanner.hasNext()) {
+                    boolean completeParameterDetected = commandFragment.toString().matches(regexFragment);
+                    if (completeParameterDetected) {
+                        boolean commandIsIncomplete = !commandScanner.hasNext() && patternScanner.hasNext();
+                        if (commandIsIncomplete) {
                             String result = (command.endsWith(" ") ? "" : " ") +
                                     patternScanner.next().replaceAll("\\(.+\\)", "()");
                             SuggestionList suggestion = new SuggestionList();
                             suggestion.add(new Suggestion(result, command.length() + result.lastIndexOf('(' + 1)));
                             return suggestion;
                         }
-                    } else if (patternFragment.startsWith(commandFragment.toString())) {
-                        SuggestionList suggestion = new SuggestionList();
-                        String result = patternFragment.substring(commandFragment.length()).replaceAll("\\(.+\\)", "()");
-                        suggestion.add(new Suggestion(result, command.length() + result.lastIndexOf('(' + 1)));
-                        return suggestion;
+                    } else {
+                        boolean incompleteParameterDetected = patternFragment.startsWith(commandFragment.toString());
+                        if (incompleteParameterDetected) {
+                            SuggestionList suggestion = new SuggestionList();
+                            String result = patternFragment.substring(commandFragment.length()).replaceAll("\\(.+\\)", "()");
+                            suggestion.add(new Suggestion(result, command.length() + result.lastIndexOf('(' + 1)));
+                            return suggestion;
+                        }
                     }
                 }
                 SuggestionList suggestion = new SuggestionList();
@@ -55,17 +62,20 @@ public class SuggestionSupplier {
                     suggestion.add(new Suggestion(result, command.length() + result.lastIndexOf('(' + 1)));
                 }
                 return suggestion;
-            } else if (patternStart.startsWith(commandStart)) {
-                StringBuilder builder = new StringBuilder(patternStart.substring(commandStart.length()));
-                if (patternScanner.hasNext()) {
-                    builder.append(" ").append(patternScanner.next().replaceAll("\\(.+\\)", "()"));
-                }
-                SuggestionList suggestion = new SuggestionList();
-                String result = builder.toString();
-                suggestion.add(new Suggestion(result, commandStart.length() + result.indexOf('(' + 1)));
-                return suggestion;
             } else {
-                return new SuggestionList();
+                boolean incompleteCommandDetected = patternStart.startsWith(commandStart);
+                if (incompleteCommandDetected) {
+                    StringBuilder builder = new StringBuilder(patternStart.substring(commandStart.length()));
+                    if (patternScanner.hasNext()) {
+                        builder.append(" ").append(patternScanner.next().replaceAll("\\(.+\\)", "()"));
+                    }
+                    SuggestionList suggestion = new SuggestionList();
+                    String result = builder.toString();
+                    suggestion.add(new Suggestion(result, commandStart.length() + result.indexOf('(' + 1)));
+                    return suggestion;
+                } else {
+                    return new SuggestionList();
+                }
             }
         } else {
             return new SuggestionList();

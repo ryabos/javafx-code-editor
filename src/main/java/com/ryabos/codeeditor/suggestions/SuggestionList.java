@@ -1,4 +1,4 @@
-package com.ryabos.codeeditor;
+package com.ryabos.codeeditor.suggestions;
 
 import java.util.LinkedList;
 import java.util.List;

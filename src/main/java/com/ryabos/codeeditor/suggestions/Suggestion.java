@@ -1,4 +1,4 @@
-package com.ryabos.codeeditor;
+package com.ryabos.codeeditor.suggestions;
 
 public class Suggestion {
     private final String suggestion;

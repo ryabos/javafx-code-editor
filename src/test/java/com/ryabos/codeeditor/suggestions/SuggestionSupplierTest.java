@@ -1,4 +1,4 @@
-package com.ryabos.codeeditor;
+package com.ryabos.codeeditor.suggestions;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
