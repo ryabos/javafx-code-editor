@@ -119,10 +119,17 @@ public class CodeArea extends Control {
                 updateControl();
                 invalidControl = false;
             }
-            double currentX = 0;
-            for (StackPane pane : panes) {
-                layoutInArea(pane, currentX, contentY, contentWidth, contentHeight, -1, HPos.LEFT, VPos.TOP);
-                currentX += CELL_WIDTH;
+            int linesCount = 0;
+            int cellCount = 0;
+
+            for (int i = 0; i < panes.length; i++) {
+                StackPane pane = panes[i];
+                if (getSkinnable().getText().charAt(i) == '\n') {
+                    cellCount = 0;
+                    linesCount++;
+                } else {
+                    layoutInArea(pane, CELL_WIDTH * cellCount++, linesCount * CELL_HEIGHT, contentWidth, contentHeight, -1, HPos.LEFT, VPos.TOP);
+                }
             }
         }
     }
