@@ -1,10 +1,10 @@
-package com.ryabos.colors;
+package com.ryabos.codeeditor.colors;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.ryabos.colors.Color.*;
+import static com.ryabos.codeeditor.colors.Color.*;
 
 class ColorSupplierTest {
     private static final String commandPattern = "send -text(<text>)";
