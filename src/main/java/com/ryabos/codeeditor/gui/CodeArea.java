@@ -1,5 +1,7 @@
 package com.ryabos.codeeditor.gui;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.HPos;
@@ -16,6 +18,19 @@ import javafx.scene.text.Text;
 
 public class CodeArea extends Control {
     private final StringProperty text = new SimpleStringProperty("");
+    private final IntegerProperty columnCount = new SimpleIntegerProperty(75);
+
+    public int getColumnCount() {
+        return columnCount.get();
+    }
+
+    public void setColumnCount(int columnCount) {
+        this.columnCount.set(columnCount);
+    }
+
+    public IntegerProperty columnCountProperty() {
+        return columnCount;
+    }
 
     public String getText() {
         return text.get();
@@ -48,6 +63,7 @@ public class CodeArea extends Control {
             control.widthProperty().addListener((observable, oldValue, newValue) -> invalidControl = true);
             control.heightProperty().addListener((observable, oldValue, newValue) -> invalidControl = true);
             control.textProperty().addListener((observable, oldValue, newValue) -> updateControl());
+            control.columnCountProperty().addListener((observable, oldValue, newValue) -> updateControl());
         }
 
         private void updateControl() {
@@ -58,6 +74,7 @@ public class CodeArea extends Control {
         }
 
         private void updatePanes(int size) {
+            size = Math.min(size, getSkinnable().getColumnCount());
             if (panes != null) {
                 for (StackPane pane : panes) {
                     getChildren().remove(pane);
@@ -74,14 +91,15 @@ public class CodeArea extends Control {
         }
 
         private void updateSymblos(String text) {
+            int size = Math.min(text.length(), getSkinnable().getColumnCount());
             if (symbols != null) {
                 for (Text symbol : symbols) {
                     getChildren().remove(symbol);
                 }
             }
-            symbols = new Text[text.length()];
+            symbols = new Text[size];
 
-            for (int i = 0; i < text.length(); i++) {
+            for (int i = 0; i < size; i++) {
                 Text symbol = new Text(String.valueOf(text.charAt(i)));
                 symbol.setFont(MONOSPACED_FONT);
                 symbols[i] = symbol;
@@ -89,6 +107,7 @@ public class CodeArea extends Control {
         }
 
         private void updateCells(int size) {
+            size = Math.min(size, getSkinnable().getColumnCount());
             if (cells != null) {
                 for (Rectangle cell : cells) {
                     getChildren().remove(cell);
@@ -105,12 +124,32 @@ public class CodeArea extends Control {
 
         @Override
         protected double computeMinWidth(double height, double topInset, double rightInset, double bottomInset, double leftInset) {
-            return 200 + leftInset + rightInset;
+            return getSkinnable().getColumnCount() * CELL_WIDTH;
+        }
+
+        @Override
+        protected double computePrefWidth(double height, double topInset, double rightInset, double bottomInset, double leftInset) {
+            return computeMinWidth(height, topInset, rightInset, bottomInset, leftInset);
+        }
+
+        @Override
+        protected double computeMaxWidth(double height, double topInset, double rightInset, double bottomInset, double leftInset) {
+            return computeMinWidth(height, topInset, rightInset, bottomInset, leftInset);
         }
 
         @Override
         protected double computeMinHeight(double width, double topInset, double rightInset, double bottomInset, double leftInset) {
-            return 50 + topInset + bottomInset;
+            return CELL_HEIGHT;
+        }
+
+        @Override
+        protected double computePrefHeight(double width, double topInset, double rightInset, double bottomInset, double leftInset) {
+            return computeMinHeight(width, topInset, rightInset, bottomInset, leftInset);
+        }
+
+        @Override
+        protected double computeMaxHeight(double width, double topInset, double rightInset, double bottomInset, double leftInset) {
+            return computeMinHeight(width, topInset, rightInset, bottomInset, leftInset);
         }
 
         @Override
@@ -120,7 +159,8 @@ public class CodeArea extends Control {
                 invalidControl = false;
             }
             double currentX = 0;
-            for (StackPane pane : panes) {
+            for (int i = 0; i < Math.min(panes.length, getSkinnable().getColumnCount()); i++) {
+                StackPane pane = panes[i];
                 layoutInArea(pane, currentX, contentY, contentWidth, contentHeight, -1, HPos.LEFT, VPos.TOP);
                 currentX += CELL_WIDTH;
             }
