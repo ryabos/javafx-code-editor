@@ -112,6 +112,7 @@ public class CodeArea extends Control {
                 if (getSkinnable().getText().charAt(i) == '\n') {
                     currentX = 0;
                     currentY += CELL_HEIGHT;
+                    getChildren().remove(pane);
                 } else {
                     layoutInArea(pane, currentX, currentY, contentWidth, contentHeight, -1, HPos.LEFT, VPos.TOP);
                     currentX += CELL_WIDTH;
